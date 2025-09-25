@@ -55,7 +55,7 @@ function ProblemPage() {
           </div>
           <div className="problem-solver">
             <div className="input-group">
-              <label>Number of Variables (n)</label>
+              <label>Number of Variables (d)</label>
               <input type="number" value={dimension} onChange={(e) => setDimension(Math.max(2, Number(e.target.value)))} />
             </div>
             <div className="input-group">

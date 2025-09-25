@@ -1,7 +1,6 @@
-/* src/styles/styles.css */
-
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Poppins:wght@600;700&display=swap');
 
+/* CSS Variables for a consistent, modern dark theme */
 :root {
   --primary-bg: #121212;
   --secondary-bg: #1E1E1E;
@@ -14,6 +13,7 @@
   --shadow-color: rgba(0, 168, 232, 0.2);
 }
 
+/* Base and reset styles */
 * {
   margin: 0;
   padding: 0;
@@ -27,6 +27,7 @@ body {
   overflow-x: hidden;
 }
 
+/* General page layout container */
 .page-container {
   min-height: 100vh;
   display: flex;
@@ -36,6 +37,7 @@ body {
   padding: 40px 20px;
   position: relative;
   text-align: center;
+  overflow: hidden;
 }
 
 .content {
@@ -43,9 +45,10 @@ body {
   z-index: 2;
   width: 100%;
   max-width: 1200px;
-  padding: 20px;
+  padding: 40px;
   background: rgba(18, 18, 18, 0.8);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
   border: 1px solid var(--border-color);
 }
@@ -55,33 +58,32 @@ body {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
   color: #FFFFFF;
-}
-
-.main-title {
-  font-size: 4rem;
-  margin-bottom: 10px;
   text-shadow: 0 0 15px var(--shadow-color);
 }
+.main-title { font-size: 4rem; margin-bottom: 10px; }
+.page-title { font-size: 2.5rem; margin-bottom: 30px; }
+.subtitle { font-size: 1.2rem; color: var(--secondary-text); margin-bottom: 40px; }
+.equation { font-size: 1.2rem; color: var(--secondary-text); margin-bottom: 20px; font-family: monospace; }
 
-.page-title {
-  font-size: 2.5rem;
-  margin-bottom: 30px;
+
+/* --- Home Page Specific --- */
+.home-page .content {
+  background: rgba(18, 18, 18, 0.7);
 }
-
-.subtitle, .equation {
-  font-size: 1.2rem;
-  color: var(--secondary-text);
-  margin-bottom: 40px;
+#particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
-
-/* --- Home Page Buttons --- */
 .button-container {
   display: flex;
   justify-content: center;
   gap: 30px;
   flex-wrap: wrap;
 }
-
 .nav-button {
   background-color: transparent;
   border: 2px solid var(--accent-color);
@@ -96,12 +98,6 @@ body {
   overflow: hidden;
   position: relative;
 }
-
-.nav-button span {
-  display: inline-block;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
 .nav-button:hover {
   background-color: var(--accent-color);
   color: var(--primary-bg);
@@ -109,14 +105,13 @@ body {
   box-shadow: 0 10px 20px var(--shadow-color);
 }
 
-/* --- Problem List Pages --- */
+/* --- Problem Menu List Pages (Card Layout) --- */
 .problem-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   width: 100%;
 }
-
 .problem-card {
   background-color: var(--card-bg);
   padding: 30px;
@@ -126,56 +121,57 @@ body {
   transition: all 0.3s ease;
   text-align: left;
 }
-
 .problem-card:hover {
   transform: translateY(-10px) scale(1.03);
   box-shadow: 0 15px 30px rgba(0,0,0,0.3);
   border-color: var(--accent-color);
 }
-
 .problem-card h3 {
   font-family: 'Poppins', sans-serif;
   color: var(--accent-color);
   margin-bottom: 10px;
 }
 
-/* --- Problem Detail Pages --- */
+/* --- Individual Problem Solver & Desmos Pages --- */
 .problem-layout {
   display: flex;
   gap: 40px;
-  margin-top: 40px;
+  margin-top: 20px;
   text-align: left;
 }
-
-.problem-media, .problem-solver {
-  flex: 1;
-}
-
+.problem-media, .problem-solver { flex: 1; }
 .problem-media img {
   width: 100%;
   max-width: 500px;
   border-radius: 15px;
   border: 1px solid var(--border-color);
 }
-
 .problem-solver {
   background: var(--secondary-bg);
   padding: 30px;
   border-radius: 15px;
+  display: flex;
+  flex-direction: column;
 }
 
-.input-group {
-  margin-bottom: 20px;
+/* --- Desmos Container --- */
+.desmos-container {
+  width: 100%;
+  height: 550px;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
 }
 
+/* --- Forms and Inputs --- */
+.input-group { margin-bottom: 20px; }
 .input-group label {
   display: block;
   margin-bottom: 8px;
   color: var(--secondary-text);
   font-size: 0.9rem;
 }
-
-.input-group input {
+.input-group input, .input-group select {
   width: 100%;
   padding: 12px;
   background-color: var(--card-bg);
@@ -185,16 +181,16 @@ body {
   font-size: 1rem;
   transition: border-color 0.2s;
 }
-
-.input-group input:focus {
+.input-group input:focus, .input-group select:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 10px var(--shadow-color);
 }
-
+.input-group-row { display: flex; gap: 15px; }
 .solve-button {
   width: 100%;
   padding: 15px;
+  margin-top: auto;
   background-color: var(--accent-color);
   color: #fff;
   border: none;
@@ -204,37 +200,26 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+.solve-button:hover:not(:disabled) { background-color: var(--accent-hover); }
+.solve-button:disabled { background-color: #555; cursor: not-allowed; }
 
-.solve-button:hover:not(:disabled) {
-  background-color: var(--accent-hover);
-}
-
-.solve-button:disabled {
-  background-color: #555;
-  cursor: not-allowed;
-}
-
+/* --- Results & Error Box --- */
 .result-box {
-  margin-top: 30px;
+  margin-top: 20px;
   padding: 20px;
   background-color: var(--card-bg);
   border-radius: 15px;
-  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color);
 }
-
-.result-box h3 {
-  color: var(--accent-color);
-  margin-bottom: 15px;
-}
-
-.result-box p {
-  line-height: 1.7;
-}
-
-.note {
-  margin-top: 30px;
-  color: var(--secondary-text);
-  font-style: italic;
+.result-box h3 { color: var(--accent-color); margin-bottom: 15px; }
+.result-box p { line-height: 1.7; }
+.error-message {
+  margin-top: 15px;
+  color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ff6b6b;
 }
 
 /* --- Responsive Design --- */
@@ -242,16 +227,56 @@ body {
   .problem-layout {
     flex-direction: column;
   }
+  .problem-detail-page .problem-layout {
+    flex-direction: column-reverse; /* Stack solver on top for Desmos page */
+  }
+}
+@media (max-width: 768px) {
+  .main-title { font-size: 3rem; }
+  .page-title { font-size: 2rem; }
+  .content { padding: 20px; }
 }
 
-@media (max-width: 768px) {
-  .main-title {
-    font-size: 3rem;
-  }
-  .page-title {
-    font-size: 2rem;
-  }
-  .nav-button {
-    min-width: 240px;
-  }
+/* Background shapes for non-interactive pages */
+.background-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
 }
+
+.background-shapes::before,
+.background-shapes::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-color) 0%, rgba(0,168,232,0) 70%);
+  animation: float 20s infinite linear;
+  opacity: 0.3;
+}
+
+.background-shapes::before {
+  width: 400px;
+  height: 400px;
+  top: 10%;
+  left: 10%;
+}
+
+.background-shapes::after {
+  width: 600px;
+  height: 600px;
+  bottom: 5%;
+  right: 5%;
+  animation-duration: 25s;
+  animation-direction: reverse;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) translateX(0px) scale(1); }
+  50% { transform: translateY(-40px) translateX(30px) scale(1.1); }
+  100% { transform: translateY(0px) translateX(0px) scale(1); }
+}
+

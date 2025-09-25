@@ -159,68 +159,78 @@ export function runOptimization(p_no, dimension, startPoint, maxIter = 100) {
     return { finalPoint: x, finalValue: evaluateFunction(p_no, x), history };
 }
 
+
 // ==============================================================================
-// == SINGLE-VARIABLE OPTIMIZATION                                             ==
+// == DYNAMIC SINGLE-VARIABLE OPTIMIZATION (USING MATH.JS)                     ==
 // ==============================================================================
 
-const singleVariableProblems = {
-  1: { type: 'max', f: (x) => (2 * x - 5)**4 - (x**2 - 1)**3, d: (x) => 8 * (2 * x - 5)**3 - 6 * x * (x**2 - 1)**2 },
-  2: { type: 'max', f: (x) => 8 + x**3 - 2 * x - 2 * Math.exp(x), d: (x) => 3 * x**2 - 2 - 2 * Math.exp(x) },
-  3: { type: 'max', f: (x) => 4 * x * Math.sin(x), d: (x) => 4 * Math.sin(x) + 4 * x * Math.cos(x) },
-  4: { type: 'min', f: (x) => 2 * (x - 3)**2 + Math.exp(0.5 * x**2), d: (x) => 4 * (x - 3) + x * Math.exp(0.5 * x**2) },
-  5: { type: 'min', f: (x) => x**2 - 10 * Math.exp(0.1 * x), d: (x) => 2 * x - Math.exp(0.1 * x) },
-  6: { type: 'max', f: (x) => 20 * Math.sin(x) - 15 * x**2, d: (x) => 20 * Math.cos(x) - 30 * x },
-};
-
-function sv_boundingPhase(p_no, x, del) {
-    const { type, f } = singleVariableProblems[p_no];
-    let k = 0, current_del = del;
-    
-    const f_prev = f(x - current_del), f_curr = f(x), f_next = f(x + current_del);
-    const isMax = type === 'max';
-
-    if ((isMax && f_prev >= f_curr && f_curr >= f_next) || (!isMax && f_prev <= f_curr && f_curr <= f_next)) {
-        current_del *= -1;
+export function runCustomSingleVariableOptimization(functionString, startPoint, type = 'min') {
+    if (typeof window.math === 'undefined') {
+        throw new Error("Math.js library is not loaded.");
     }
 
-    let x_prev = x, x0 = x + current_del, x1 = x0 + Math.pow(2, k) * current_del;
-    k++;
+    let f, d;
+    try {
+        const node = window.math.parse(functionString);
+        const compiledF = node.compile();
+        f = (x) => compiledF.evaluate({ x });
 
-    const shouldContinue = (val1, val2) => (isMax ? val1 > val2 : val1 < val2);
+        const derivativeNode = window.math.derivative(functionString, 'x');
+        const compiledD = derivativeNode.compile();
+        d = (x) => compiledD.evaluate({ x });
 
-    while (shouldContinue(f(x1), f(x0))) {
-        x_prev = x0;
-        x0 = x1;
-        x1 = x0 + Math.pow(2, k) * current_del;
+        f(startPoint);
+        d(startPoint);
+    } catch (e) {
+        throw new Error("Invalid function syntax.");
+    }
+
+    const isMax = type === 'max';
+    const epsilon = 1e-7;
+    const delta = 0.1;
+
+    const boundingPhase = (x, del) => {
+        let k = 0, current_del = del;
+        const f_prev = f(x - current_del), f_curr = f(x), f_next = f(x + current_del);
+        if ((isMax && f_prev >= f_curr && f_curr >= f_next) || (!isMax && f_prev <= f_curr && f_curr <= f_next)) {
+            current_del *= -1;
+        }
+        let x_prev = x, x0 = x + current_del;
+        let x1 = x0 + Math.pow(2, k) * current_del;
         k++;
-    }
+        const shouldContinue = (val1, val2) => (isMax ? val1 > val2 : val1 < val2);
+        while (shouldContinue(f(x1), f(x0))) {
+            x_prev = x0;
+            x0 = x1;
+            x1 = x0 + Math.pow(2, k) * current_del;
+            k++;
+            if (k > 100) throw new Error("Bounding phase did not converge.");
+        }
+        const interval = [x_prev, x1];
+        interval.sort((a, b) => a - b);
+        return interval;
+    };
+
+    const bisection = (left, right) => {
+        let mid, md;
+        let iter = 0;
+        do {
+            mid = (left + right) / 2;
+            md = d(mid);
+            if ((isMax && md > 0) || (!isMax && md < 0)) left = mid;
+            else right = mid;
+            iter++;
+            if (iter > 100) throw new Error("Bisection did not converge.");
+        } while (Math.abs(d(mid)) > epsilon);
+        return [left, right];
+    };
     
-    const interval = [x_prev, x1];
-    interval.sort((a,b) => a-b);
-    return interval;
-}
-
-function sv_bisection(p_no, left, right, epsilon) {
-    const { type, d } = singleVariableProblems[p_no];
-    let mid, md;
-    const isMax = type === 'max';
-
-    do {
-        mid = (left + right) / 2;
-        md = d(mid);
-        if ((isMax && md > 0) || (!isMax && md < 0)) left = mid;
-        else right = mid;
-    } while (Math.abs(md) > epsilon);
-    
-    return [left, right];
-}
-
-export function runSingleVariableOptimization(p_no, startPoint, delta, epsilon) {
-    const bounded_interval = sv_boundingPhase(p_no, startPoint, delta);
-    const finalInterval = sv_bisection(p_no, bounded_interval[0], bounded_interval[1], epsilon);
+    const bounded_interval = boundingPhase(startPoint, delta);
+    const finalInterval = bisection(bounded_interval[0], bounded_interval[1]);
     
     const optimalX = (finalInterval[0] + finalInterval[1]) / 2;
-    const optimalValue = singleVariableProblems[p_no].f(optimalX);
+    const optimalValue = f(optimalX);
 
-    return { finalInterval, optimalX, optimalValue };
+    return { optimalX, optimalValue };
 }
+

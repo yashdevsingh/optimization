@@ -1,15 +1,28 @@
-// src/components/Home.js
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import InteractiveBackground from './InteractiveBackground'; // Assuming this is in the same folder
 import '../styles/styles.css';
-import InteractiveBackground from './InteractiveBackground';
 
 function Home() {
   const navigate = useNavigate();
 
+  const handleMouseEnter = (e, newText) => {
+    const originalText = e.target.getAttribute('data-original-text');
+    if (!originalText) {
+      e.target.setAttribute('data-original-text', e.target.innerText);
+    }
+    e.target.innerText = newText;
+  };
+
+  const handleMouseLeave = (e) => {
+    const originalText = e.target.getAttribute('data-original-text');
+    if (originalText) {
+      e.target.innerText = originalText;
+    }
+  };
+
   return (
-    <div className="page-container home">
+    <div className="page-container home-page">
       <InteractiveBackground />
       <div className="content">
         <h1 className="main-title">Optimization</h1>
@@ -17,19 +30,19 @@ function Home() {
         <div className="button-container">
           <button
             className="nav-button"
-            onClick={() => navigate('/single-variable')}
-            onMouseEnter={(e) => (e.currentTarget.querySelector('span').textContent = 'x')}
-            onMouseLeave={(e) => (e.currentTarget.querySelector('span').textContent = 'Single Variable Optimization')}
+            onClick={() => navigate('/single-variable-optimizer')}
+            onMouseEnter={(e) => handleMouseEnter(e, 'x')}
+            onMouseLeave={handleMouseLeave}
           >
-            <span>Single Variable Optimization</span>
+            Single Variable Optimization
           </button>
           <button
             className="nav-button"
             onClick={() => navigate('/multi-variable')}
-            onMouseEnter={(e) => (e.currentTarget.querySelector('span').textContent = '(x₁, x₂, ..., xₙ)')}
-            onMouseLeave={(e) => (e.currentTarget.querySelector('span').textContent = 'Multi Variable Optimization')}
+            onMouseEnter={(e) => handleMouseEnter(e, '(x₁, x₂, ..., xₙ)')}
+            onMouseLeave={handleMouseLeave}
           >
-            <span>Multi Variable Optimization</span>
+            Multi Variable Optimization
           </button>
         </div>
       </div>
@@ -38,3 +51,4 @@ function Home() {
 }
 
 export default Home;
+
